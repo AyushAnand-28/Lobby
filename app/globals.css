@@ -1,26 +1,349 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /*
+   * One face, everywhere. Display and body resolve to the same variable
+   * grotesque — hierarchy comes from weight and scale, never from a second
+   * family.
+   */
+  --font-sans: var(--font-host-grotesk);
+  --font-mono: var(--font-host-grotesk);
+  --font-heading: var(--font-host-grotesk);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /*
+   * Brand palette — product chrome. Fixed across every sport, so the app has
+   * one identity rather than changing colour depending on what is being played.
+   *
+   * The language is monochrome: pure black ground, pure white ink, one
+   * electric accent used sparingly. `ink` is the dark surface and `paper` the
+   * light one, so `bg-ink text-paper` is the default band and
+   * `bg-paper text-ink` is the inverted band the footer uses.
+   */
+  --color-paper: var(--brand-paper);
+  --color-ink: var(--brand-ink);
+  --color-brand: var(--brand-primary);
+  --color-brand-foreground: var(--brand-primary-foreground);
+  --color-flame: var(--brand-accent);
+  --color-flame-foreground: var(--brand-accent-foreground);
+  --color-mist: var(--brand-mist);
+
+  /*
+   * Sport accent — per-sport, set on a wrapper by sportThemeVars(). Only
+   * tournament-facing surfaces should read these; product chrome uses brand.
+   */
+  --color-sport-accent: var(--sport-accent);
+  --color-sport-accent-foreground: var(--sport-accent-foreground);
+  --color-sport-accent-soft: var(--sport-accent-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Sharp corners. The reference language sits at 0–4px, never pill-shaped. */
+  --radius: 0.25rem;
+
+  /*
+   * Spatial primitives, lifted from the reference. Every gutter and every
+   * band rhythm is expressed in these two values, which is why the layout
+   * holds together from 390px to 1920px without a pile of breakpoints.
+   *
+   * The vertical unit is svh-based, so it breathes with viewport height
+   * rather than tracking width like a clamp on vw would.
+   */
+  --x-default: 20px;
+  --x-double-default: calc(var(--x-default) * 2);
+  --y-default: clamp(20px, 8svh, 100px);
+  --y-half-default: calc(var(--y-default) / 2);
+
+  --brand-paper: #ffffff;
+  --brand-ink: #000000;
+  /* Primary action is a white block on black — the accent is not a colour. */
+  --brand-primary: #ffffff;
+  --brand-primary-foreground: #000000;
+  /* The one chromatic note in the language, used for focus and live state. */
+  --brand-accent: #1b17ee;
+  --brand-accent-foreground: #ffffff;
+  /* Raised surface. Barely lifted off black — enough to read as a card. */
+  --brand-mist: #111111;
+
+  --background: var(--brand-ink);
+  --foreground: var(--brand-paper);
+  --card: var(--brand-mist);
+  --card-foreground: var(--brand-paper);
+  --popover: #0a0a0a;
+  --popover-foreground: var(--brand-paper);
+
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-primary-foreground);
+  --secondary: #1a1a1a;
+  --secondary-foreground: var(--brand-paper);
+  --muted: #141414;
+  /* 0.56 against #000 clears 7:1 — body copy on the dark ground is AAA. */
+  --muted-foreground: rgb(255 255 255 / 0.56);
+  --accent: #1a1a1a;
+  --accent-foreground: var(--brand-paper);
+  --destructive: #ff5c47;
+
+  --border: rgb(255 255 255 / 0.14);
+  --input: rgb(255 255 255 / 0.22);
+  --ring: var(--brand-accent);
+
+  --chart-1: var(--brand-paper);
+  --chart-2: var(--brand-accent);
+  --chart-3: #7d8fdd;
+  --chart-4: rgb(255 255 255 / 0.4);
+  --chart-5: var(--brand-mist);
+
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: var(--brand-paper);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: var(--brand-primary-foreground);
+  --sidebar-accent: #1a1a1a;
+  --sidebar-accent-foreground: var(--brand-paper);
+  --sidebar-border: rgb(255 255 255 / 0.14);
+  --sidebar-ring: var(--brand-accent);
+
+  /* Generic fallback accent — a sport with no theme file still renders. */
+  --sport-accent: var(--brand-paper);
+  --sport-accent-foreground: var(--brand-ink);
+  --sport-accent-soft: var(--brand-mist);
+}
+
+/*
+ * The language is dark by construction rather than by preference, so `.dark`
+ * only has to correct the handful of tokens that would otherwise invert. It is
+ * kept so shadcn's `dark:` variants stay meaningful.
+ */
+.dark {
+  --background: var(--brand-ink);
+  --foreground: var(--brand-paper);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    /*
+     * The reference hides the scrollbar entirely and lets the smooth-scroll
+     * layer own the sense of position. Keyboard and wheel scrolling are
+     * untouched — only the track is hidden.
+     */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-host-grotesk), sans-serif;
+    font-size: 16px;
+  }
+
+  /*
+   * Display type: large, tightly leaded, and — unlike most grotesque display
+   * settings — tracked at `normal`. The reference deliberately does not
+   * negative-track its headings; at 12vw the counters need the room, and
+   * pulling them in is what makes big type look cheap.
+   */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-host-grotesk), sans-serif;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--brand-accent);
+    color: var(--brand-accent-foreground);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+ * Lenis owns the scroll position, so the browser must not also try to smooth
+ * it. `html.lenis` is written by the library once it initialises.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@utility display-xl {
+  /*
+   * The hero measure. Clamped on width *and* height: `12vw` sets the
+   * proportion, `(100svh - 2*var(--y-default))/3` stops three stacked lines
+   * from ever overflowing a short viewport, and 280px caps it on ultrawide.
+   * This exact pairing is what makes the hero survive a landscape phone.
+   */
+  font-size: clamp(
+    38px,
+    min(12vw, calc((100svh - 2 * var(--y-default)) / 3)),
+    280px
+  );
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+@utility display-lg {
+  /* Section headings — the same proportion, roughly a third of the hero. */
+  font-size: clamp(28px, 4.4vw, 72px);
+  line-height: 1.05;
+  font-weight: 600;
+}
+
+@utility eyebrow {
+  /*
+   * Section label. The reference sets these at body size and *light* weight
+   * with a filled dot in front, rather than the usual small-caps-and-tracking
+   * treatment — it reads as an annotation, not a heading.
+   */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: normal;
+  text-transform: uppercase;
+
+  &::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: currentColor;
+    flex: none;
+  }
+}
+
+@utility band {
+  /* Full-bleed section. The stack of these is the page. */
+  width: 100%;
+  padding-block: var(--y-default);
+  padding-inline: var(--x-default);
+}
+
+@utility gutter {
+  padding-inline: var(--x-default);
+}
+
+/*
+ * Masked line/character reveal. GSAP's SplitText writes the wrapper elements;
+ * these rules give them the clipping box the animation slides out of. Without
+ * `overflow: clip` the text would simply translate rather than appear to be
+ * uncovered.
+ */
+.split-line,
+.split-char,
+.split-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+/*
+ * Anything waiting on a scroll-triggered reveal starts invisible, but only
+ * once JS has confirmed it can run the animation. Without the `[data-ready]`
+ * gate a JS failure would leave the page permanently blank.
+ */
+[data-reveal][data-ready="true"] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal][data-ready="true"] {
+    visibility: visible;
+  }
+}
+
+/*
+ * Grain jitter. Stepping the tile between eight offsets is enough to read as
+ * live film grain; because it only moves a repeating background, it never
+ * triggers layout or paint of anything underneath.
+ */
+@keyframes grain {
+  0% {
+    background-position: 0 0;
+  }
+  12.5% {
+    background-position: -6% -3%;
+  }
+  25% {
+    background-position: -12% 6%;
+  }
+  37.5% {
+    background-position: 7% -12%;
+  }
+  50% {
+    background-position: -6% 12%;
+  }
+  62.5% {
+    background-position: 12% 3%;
+  }
+  75% {
+    background-position: 3% -6%;
+  }
+  87.5% {
+    background-position: -3% 9%;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }
