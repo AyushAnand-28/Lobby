@@ -199,7 +199,7 @@ function describeAuthError(error: AuthError): string {
     case "invalid_credentials":
       return "That email and password do not match.";
     case "email_not_confirmed":
-      return "Confirm your email address first — check your inbox for the link.";
+      return "Confirm your email address first. Check your inbox for the link.";
     case "over_email_send_rate_limit":
     case "over_request_rate_limit":
       return "Too many attempts. Wait a minute and try again.";

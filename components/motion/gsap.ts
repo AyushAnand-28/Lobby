@@ -57,8 +57,15 @@ export const STAGGER = {
   char: 0.02,
 } as const;
 
-/** The reference reveals content when its top passes 70% of the viewport. */
-export const REVEAL_START = "top 70%";
+/**
+ * The reference reveals content when its top passes 70% of the viewport.
+ *
+ * `clamp()` keeps that trigger inside the page's scroll range. Without it,
+ * something near the end of a short page (the last section of a tournament
+ * page with few results) sits below the 70% line even at maximum scroll and
+ * never appears. Everywhere else the trigger point is unchanged.
+ */
+export const REVEAL_START = "clamp(top 70%)";
 
 /**
  * Play in, and reverse back out if the user scrolls up past the trigger.

@@ -86,7 +86,7 @@ export function createBadmintonScoring(rules: BadmintonScoringRules): ScoringEng
           return {
             ok: false,
             game: index,
-            message: `${label}: ${game.a}-${game.b} can't happen — ${endsRule()}.`,
+            message: `${label}: ${game.a}-${game.b} can't happen: ${endsRule()}.`,
           };
         }
         gamesWon[winner] += 1;
@@ -99,14 +99,14 @@ export function createBadmintonScoring(rules: BadmintonScoringRules): ScoringEng
         return {
           ok: false,
           game: index,
-          message: `${label} is not finished at ${game.a}-${game.b} — ${endsRule()}.`,
+          message: `${label} is not finished at ${game.a}-${game.b}: ${endsRule()}.`,
         };
       }
       if (final) {
         return {
           ok: false,
           game: index,
-          message: `${label} is not finished at ${game.a}-${game.b} — ${endsRule()}.`,
+          message: `${label} is not finished at ${game.a}-${game.b}: ${endsRule()}.`,
         };
       }
       liveGame = index;
@@ -115,7 +115,7 @@ export function createBadmintonScoring(rules: BadmintonScoringRules): ScoringEng
     if (final && !decided) {
       return {
         ok: false,
-        message: `The match is not decided yet — it is ${gamesWon.a}-${gamesWon.b} in games, and a side needs ${gamesToWin}.`,
+        message: `The match is not decided yet. It is ${gamesWon.a}-${gamesWon.b} in games, and a side needs ${gamesToWin}.`,
       };
     }
 

@@ -4,10 +4,12 @@ Tournament software for local and college sport. An organizer sets up a
 tournament, registers teams, generates fixtures, enters scores from their phone
 at the venue, and shares one public link that players and spectators can open.
 
-**Status: early scaffolding.** This repository currently contains the landing
-page and the organizer authentication surface. The database schema, tournament
-management, fixtures, score entry and the public tournament page are not built
-yet — see [What is not here yet](#what-is-not-here-yet).
+**Status: a badminton tournament runs end to end.** An organizer creates a
+tournament, shares a registration link, approves entries, makes the draw
+(knockout, round robin, or groups then knockout), calls matches to courts and
+enters scores — typed in after the match or rally by rally — and the public
+page updates live until the podium. Volunteers can score from a shared link
+without an account. See [What is not here yet](#what-is-not-here-yet).
 
 ## Stack
 
@@ -99,6 +101,13 @@ to whichever project you have selected.
    `/auth/callback`, and has no `/auth/confirm`. Copy the path above, not the
    one in their guide.
 
+6. Run the migrations in [supabase/migrations/](supabase/migrations/), oldest
+   first. Either paste each file into the dashboard's **SQL Editor** and run it,
+   or use the CLI: `npx supabase link --project-ref <ref>` then
+   `npx supabase db push`. The SQL Editor records no migration history, so if
+   you switch to the CLI later, first mark the files already run with
+   `npx supabase migration repair --status applied <timestamp>…`.
+
 On the free tier Supabase's built-in SMTP is rate limited to a few emails per
 hour, which is enough to test but not to demo. Configure your own SMTP under
 **Project Settings → Auth** before showing it to anyone.
@@ -122,11 +131,15 @@ Three audiences, deliberately different levels of access:
 | Audience | Auth | Notes |
 | --- | --- | --- |
 | Organizer | Full account — email + password, or magic link | The only role that logs in |
-| Team captain | Signed token link, no account | Submits a registration form. Not built yet |
-| Spectator | None | Reads the public tournament page. Not built yet |
+| Team captain | Shared registration link, no account | Submits an entry at `/r/<token>`; it waits for the organizer's approval |
+| Scorer (volunteer) | Shared scorer link, no account | At `/s/<token>`: calls matches to courts and enters scores. Nothing else — no entries, draw, settings or phone numbers |
+| Spectator | None | Reads the public page at `/t/<slug>`, which updates live |
 
 There is exactly one authenticated role. No roles table, no permissions system,
-no admin tier.
+no admin tier. The two links are credentials in their own right: each is one
+token per tournament that the organizer can replace, which cuts off the old
+URL, and each reaches the database only through `SECURITY DEFINER` functions
+that check it.
 
 Flows implemented so far:
 
@@ -161,21 +174,34 @@ Flows implemented so far:
 ```
 app/
   (auth)/          login, signup — unauthenticated screens
-  (dashboard)/     protected organizer routes
+  (dashboard)/     protected organizer routes: tournament list, create, and per
+                   tournament: overview, entries, draw, matches, standings, edit
+  r/[token]/       the captain's registration page, reached from the shared link
+  s/[token]/       the volunteer scorer's courts and scoring screens
+  t/[slug]/        the public tournament page
   auth/callback/   handles every emailed auth link
   page.tsx         landing page
 lib/
   auth/            session helpers, route guards, server actions
+  tournament/      draw engine, standings, the shared read model (view.ts),
+                   queries and Server Actions
+  scoring/         live scoring as a rally log: replay, undo, service
   supabase/        SSR-aware Supabase clients
   validation/      Zod schemas
 sports/
-  registry.ts      sport -> { theme, components }, with generic fallbacks
-  badminton/       theme.ts
+  registry.ts      sport -> { theme, scoring, entry kind }, with generic fallbacks
+  badminton/       rules, scoring, theme
 components/
   ui/              shadcn
   auth/            form field, alert, submit button, logout
+  forms/           shared form controls
+  scoring/         the match scoring screen (live and final score)
+  tournament/      bracket, standings table, court board, match lines, podium
+supabase/
+  migrations/      schema, row level security, tournament functions, courts
+                   and live scoring and the scorer link
 proxy.ts           session refresh + route protection
-tests/
+tests/             unit tests, and tests/db against the real migrations in PGlite
 ```
 
 Two structural rules the code follows, and future code must too:
@@ -196,17 +222,14 @@ warning, so this project uses the new name.
 
 ## What is not here yet
 
-Deliberately out of scope for this slice:
+- Sports other than badminton. The engine is sport-agnostic and the registry
+  has generic fallbacks, but only badminton has rules, scoring and a theme.
+- Team ties (a club fielding several rubbers against another) — each fixture
+  is one match.
+- Scheduled match times. Matches have an order of play and are called to courts
+  as they free up.
+- Withdrawing an entry mid-tournament as a single action; record walkovers for
+  its remaining matches instead.
 
-- Database schema, Drizzle migrations, RLS policies
-- Password reset (magic link covers the "I forgot my password" case for now)
-- Tournament creation and management
-- Team registration via captain token links
-- Fixture generation, score entry, standings
-- The public tournament page at `/t/[slug]`
-- Payments, notifications, team accounts, admin panel, CI/CD
-
-The next slice is the schema and RLS policies — `organizers`, `sports`,
-`tournaments`, `participants` and `registration_tokens`, with row level security
-enabled from the first migration and placeholder migrations reserving the
-ordering for `stages`, `matches` and `results`.
+Not planned for now: password reset (magic link covers "I forgot my
+password"), payments, notifications, team accounts, an admin panel, CI/CD.

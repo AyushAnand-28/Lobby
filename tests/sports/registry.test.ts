@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_SPORT_THEME,
+  getEntryKind,
   getScoringEngine,
   getSport,
   getSportTheme,
@@ -34,6 +35,23 @@ describe("sport registry", () => {
     const engine = getScoringEngine("badminton", { scoringPreset: "single-21" });
     expect(engine.maxGames).toBe(1);
     expect(engine.check([{ a: 22, b: 20 }], { final: true }).ok).toBe(true);
+  });
+
+  it("describes a badminton entry from tournament settings", () => {
+    expect(getEntryKind("badminton", { entryType: "singles" })).toEqual({
+      label: "Singles",
+      noun: "player",
+    });
+    expect(getEntryKind("badminton", { entryType: "mixed" })).toEqual({
+      label: "Mixed doubles",
+      noun: "pair",
+    });
+    // Unreadable settings fall back to badminton's default event.
+    expect(getEntryKind("badminton", null).noun).toBe("player");
+  });
+
+  it("calls an unknown sport's entries teams", () => {
+    expect(getEntryKind("kabaddi", null)).toEqual({ label: "Teams", noun: "team" });
   });
 
   it("lists every registered sport", () => {

@@ -1,11 +1,11 @@
 # Getting login working
 
-Lobby's auth needs a Supabase project and two environment variables. **No
-database schema, migrations or SQL are required** — every auth call goes
-through `supabase.auth.*` and Supabase manages those tables itself. You can be
-logged in without creating a single table.
+Lobby needs a Supabase project, two environment variables, and the
+migrations in `supabase/migrations/` (step 7). Login itself works before the
+migrations run, but the dashboard reads the tournament tables, so run them
+before using it.
 
-Takes about five minutes.
+Takes about ten minutes.
 
 ---
 
@@ -96,6 +96,41 @@ npm run dev
 Then go to <http://localhost:3000/signup> and create the first organizer
 account. Organizers are the only people who ever sign up — captains register a
 team from a shared link, and spectators need nothing.
+
+---
+
+## 7. Run the migrations
+
+In the dashboard, open **SQL Editor**. For each file in `supabase/migrations/`,
+oldest first:
+
+1. Open a new query, paste the whole file and click **Run**.
+2. Wait for *Success. No rows returned* before starting the next file.
+
+Two prompts are expected along the way:
+
+- **"Creates tables without enabling Row Level Security"** on the first file.
+  The second file turns it on; choose **Run and enable RLS** so the tables are
+  never exposed in between.
+- **"Destructive operation"** on the later files. They only *revoke*
+  permissions, or define functions that delete rows when called; running the
+  file deletes nothing.
+
+Check the result in **Table Editor**: eight tables, and `sports` holding one
+row, Badminton. If any file errors, stop there rather than running the next.
+
+The fourth migration also adds `matches`, `tournaments` and `participants` to
+Supabase Realtime, which is what makes the public page update live. Nothing
+needs switching on in the dashboard; if you had already added a table there,
+the migration skips it.
+
+The SQL Editor keeps no record of which files have run. If you later apply
+migrations with the Supabase CLI (`supabase db push`), first mark the ones
+already run as done with `supabase migration repair --status applied
+<timestamp>` for each.
+
+**When a new migration is added**, run just that file the same way. The app's
+pages expect every migration to have run, and show an error until it has.
 
 ---
 

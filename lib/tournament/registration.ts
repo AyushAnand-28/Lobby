@@ -61,6 +61,43 @@ export const REGISTRATION_BLOCK_COPY: Record<RegistrationBlock, { title: string;
   },
 };
 
+/**
+ * Copy for an error raised by `submit_registration()`. The function raises a
+ * short code as the message (`registration_full`, `duplicate_name`, ...); a
+ * field name means the message belongs next to that input.
+ */
+export function describeRegistrationError(
+  code: string,
+  entryNoun: string,
+): { field?: "name" | "players" | "captainName" | "phone"; message: string } {
+  const blocked = code.startsWith("registration_") ? code.slice("registration_".length) : null;
+  if (blocked && blocked in REGISTRATION_BLOCK_COPY) {
+    return { message: REGISTRATION_BLOCK_COPY[blocked as RegistrationBlock].body };
+  }
+
+  switch (code) {
+    case "invalid_token":
+      return {
+        message: "This link is no longer valid. Ask the organizer for the current one.",
+      };
+    case "duplicate_name":
+      return {
+        field: "name",
+        message: `A ${entryNoun} with this name is already entered. Add a club or initials to tell them apart.`,
+      };
+    case "invalid_name":
+      return { field: "name", message: "Enter a name of 80 characters or fewer." };
+    case "invalid_players":
+      return { field: "players", message: "Check the player names and how many are entered." };
+    case "invalid_captain":
+      return { field: "captainName", message: "Enter your name." };
+    case "invalid_phone":
+      return { field: "phone", message: "Enter a phone number the organizer can reach you on." };
+    default:
+      return { message: "Your entry could not be saved. Check the form and try again." };
+  }
+}
+
 /** For the organizer, on their dashboard. */
 export const REGISTRATION_BLOCK_ORGANIZER_COPY: Record<RegistrationBlock, string> = {
   not_published: "Publish the tournament to start taking entries.",

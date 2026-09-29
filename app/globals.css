@@ -174,6 +174,8 @@
      */
     scrollbar-width: none;
     -ms-overflow-style: none;
+    /* Native controls — date pickers, checkboxes — drawn for a dark ground. */
+    color-scheme: dark;
   }
 
   html::-webkit-scrollbar {
@@ -310,6 +312,51 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   [data-reveal][data-ready="true"] {
     visibility: visible;
+  }
+}
+
+/*
+ * A score that has just changed rolls up into place, so someone glancing at a
+ * court card sees that a point was played, not only what the score now is.
+ * The digit is rendered in a span keyed on its value: a new value remounts the
+ * span, and the animation runs once per point.
+ */
+@keyframes score-roll {
+  from {
+    transform: translateY(0.4em);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/*
+ * Banner photographs settle from a slight zoom as the page opens, on the
+ * hero's 1.8s power4-like curve, so a tournament's header arrives rather than
+ * appears.
+ */
+@keyframes media-settle {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.score-roll {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .score-roll {
+    animation: score-roll 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .media-settle {
+    animation: media-settle 1.8s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 

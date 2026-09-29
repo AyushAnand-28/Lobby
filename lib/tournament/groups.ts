@@ -40,7 +40,7 @@ export function planGroupStage(
 
   if (seeded.length < groupCount * 2) {
     throw new PlanError(
-      `${groupCount} groups need at least ${groupCount * 2} entries — you have ${seeded.length}.`,
+      `${groupCount} groups need at least ${groupCount * 2} entries, and you have ${seeded.length}.`,
     );
   }
 

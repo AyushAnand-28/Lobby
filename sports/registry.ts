@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import { parseBadmintonSettings } from "./badminton/rules";
+import { ENTRY_TYPES, parseBadmintonSettings } from "./badminton/rules";
 import { createBadmintonScoring } from "./badminton/scoring";
 import { badmintonTheme } from "./badminton/theme";
 import { createGenericScoring } from "./generic/scoring";
@@ -38,11 +38,21 @@ export type SportTheme = {
 /** Order in which level teams in a league table are separated. */
 export type Tiebreaker = "matches_won" | "game_difference" | "point_difference" | "head_to_head";
 
+/** What one entry in a draw is, in words: "Doubles", a "pair". */
+export type EntryKind = {
+  /** The event, for headings: "Singles", "Mixed doubles". */
+  label: string;
+  /** One entry, for form labels and counts: "player", "pair", "team". */
+  noun: string;
+};
+
 export type SportEntry = {
   theme: SportTheme;
   /** Scoring engine for a tournament, built from its stored `settings`. */
   scoring: (settings: unknown) => ScoringEngine;
   tiebreakers: readonly Tiebreaker[];
+  /** What an entry is, read from a tournament's stored `settings`. */
+  entryKind: (settings: unknown) => EntryKind;
 };
 
 /**
@@ -72,6 +82,7 @@ const GENERIC_SPORT: SportEntry = {
   theme: DEFAULT_SPORT_THEME,
   scoring: (settings) => createGenericScoring(readBestOf(settings)),
   tiebreakers: DEFAULT_TIEBREAKERS,
+  entryKind: () => ({ label: "Teams", noun: "team" }),
 };
 
 export const SPORTS: Record<string, SportEntry> = {
@@ -80,6 +91,10 @@ export const SPORTS: Record<string, SportEntry> = {
     scoring: (settings) => createBadmintonScoring(parseBadmintonSettings(settings).scoring),
     // Matches the order seeded into sports.config for badminton.
     tiebreakers: ["matches_won", "game_difference", "point_difference", "head_to_head"],
+    entryKind: (settings) => {
+      const entry = ENTRY_TYPES[parseBadmintonSettings(settings).entryType];
+      return { label: entry.label, noun: entry.entryNoun };
+    },
   },
 };
 
@@ -94,6 +109,10 @@ export function getSportTheme(slug: string | null | undefined): SportTheme {
 
 export function getScoringEngine(slug: string | null | undefined, settings: unknown): ScoringEngine {
   return getSport(slug).scoring(settings);
+}
+
+export function getEntryKind(slug: string | null | undefined, settings: unknown): EntryKind {
+  return getSport(slug).entryKind(settings);
 }
 
 export function listSports(): SportTheme[] {

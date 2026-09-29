@@ -47,6 +47,27 @@ shallow banner on mobile.
 clip with ffmpeg so the poster and the first video frame are identical — a
 mismatched poster visibly pops the moment the clip starts playing.
 
+### Tournament screens
+
+Badminton-specific, for the organizer's tournament pages, the captain's
+registration page and the public tournament page. Darker frames were picked
+on purpose: every one of these sits under text on a black ground.
+
+| File | Photo id | Photographer | Subject | Used for |
+| --- | --- | --- | --- | --- |
+| `tournament-banner.jpg` | `photo-1626721105368-a69248e93b32` | Stephan Rothe | Shuttlecock on the net, dark hall | Organizer tournament banner; a dashboard card |
+| `register-panel.jpg` | `photo-1722087642932-9b070e9a066e` | Irish83 | Jump smash in a dark gym (portrait) | Captain registration side panel |
+| `dashboard-hall.jpg` | `photo-1599391398131-cd12dfc6c24e` | Muktasim Azlan | Player mid-rally under hall lights | Dashboard greeting |
+| `podium-trophies.jpg` | `photo-1770482228588-270b08d2d376` | breizhography | Lit wall of trophies | Podium, everywhere it appears |
+| `empty-shuttle.jpg` | `photo-1696250530563-70f39e532e10` | Sleeba Thomas | Shuttlecock in flight on dark green | Dashboard before the first tournament |
+| `card-court.jpg` | `photo-1775993167393-f2add1f8eec2` | Palak Pitroda | Empty indoor courts, blue floor | Dashboard card |
+| `card-shuttle.jpg` | `photo-1765544581327-b5e9055d986c` | Ogie | Shuttlecock on a green court | Dashboard card |
+| `tournament-hero.jpg` | - | - | Frame 1 of `tournament-loop.mp4` | Public page hero poster |
+
+Dashboard cards pick one of the three card images from the tournament's id
+(`lib/tournament/art.ts`), so a list of tournaments is not one photograph
+repeated.
+
 ## Video — Pexels
 
 `../video/hero-loop.mp4` — Pexels video `32578918`, "Children practicing soccer
@@ -66,3 +87,20 @@ ffmpeg -ss 10 -t 11 -i <source>.mp4 \
 
 The clip is still gated off on narrow viewports, `prefers-reduced-motion` and
 `Save-Data` — see `components/motion/hero-media.tsx`.
+
+`../video/tournament-loop.mp4` — Pexels video `35087074`, "Dynamic Indoor
+Badminton Match with Youths" by Sarthak Raj: three young players on a
+community court, which is who Lobby is for.
+Source: https://www.pexels.com/video/dynamic-indoor-badminton-match-with-youths-35087074/
+
+The original is 3840×2160, 22s, 95 MB. Cut to 10s from 0:08, re-encoded to
+1920×1080 with a mild grade (saturation 0.8, contrast 1.06, brightness −0.03)
+so it sits under the dark scrim, CRF 30, no audio, `+faststart` — **1.4 MB**:
+
+```
+ffmpeg -ss 8 -t 10 -i <source>.mp4   -vf "scale=1920:1080:flags=lanczos,eq=saturation=0.8:contrast=1.06:brightness=-0.03"   -c:v libx264 -preset slow -crf 30 -pix_fmt yuv420p -movflags +faststart -an tournament-loop.mp4
+ffmpeg -i tournament-loop.mp4 -frames:v 1 -q:v 4 ../images/tournament-hero.jpg
+```
+
+Played through the same `HeroMedia` component as the landing clip, so the same
+gating applies: wide viewports only, never under reduced motion or Save-Data.

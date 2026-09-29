@@ -23,7 +23,7 @@ const hostGrotesk = Host_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Lobby — run your tournament from your phone",
+    default: "Lobby: run your tournament from your phone",
     template: "%s · Lobby",
   },
   description:

@@ -42,7 +42,7 @@ export function createGenericScoring(bestOf = 1): ScoringEngine {
         gamesWon[winner] += 1;
         if (gamesWon[winner] >= gamesToWin) decided = winner;
       } else if (index < games.length - 1 || options.final) {
-        return { ok: false, game: index, message: `Game ${index + 1} is level — it has no winner yet.` };
+        return { ok: false, game: index, message: `Game ${index + 1} is level, so it has no winner yet.` };
       } else {
         live = index;
       }

@@ -45,7 +45,7 @@ export default async function LandingPage() {
           {/* One heading for the accessibility tree; the display lines below
               are decorative duplicates so each can carry its own alignment. */}
           <h1 className="sr-only">
-            Lobby turns scores into standings — tournament software for local
+            Lobby turns scores into standings: tournament software for local
             and college organizers.
           </h1>
 
@@ -282,8 +282,8 @@ export default async function LandingPage() {
               >
                 <p>
                   Lobby is built for the person at the scorer&rsquo;s table, not
-                  for a federation. Every sport brings its own scoring — sets
-                  and games, runs and wickets, raid points — so you enter a
+                  for a federation. Every sport brings its own scoring (sets
+                  and games, runs and wickets, raid points), so you enter a
                   result rather than work one out.
                 </p>
                 <p>

@@ -78,6 +78,9 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         syncTouch: false,
         touchMultiplier: 2,
         wheelMultiplier: 1,
+        // In-page links (the public page's section nav) glide rather than
+        // jump, and leave Lenis's position in step with the page.
+        anchors: true,
       }}
     >
       {children}
